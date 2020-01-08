@@ -69,14 +69,14 @@ class MarantzAVR:
         return self._get_boolean_data("MU")
 
     @property
-    def volume_level(self) -> Optional[int]:
+    def volume_level(self) -> Optional[float]:
         """Volume level of the AVR zone (00..max_volume_level)."""
-        return self._get_int_data("MV")
+        return self._get_volume_level("MV")
 
     @property
-    def max_volume_level(self) -> Optional[int]:
+    def max_volume_level(self) -> Optional[float]:
         """Maximum volume level of the AVR zone."""
-        return self._get_int_data("MVMAX")
+        return self._get_volume_level("MVMAX")
 
     @property
     def source(self) -> Optional[InputSource]:
@@ -117,6 +117,18 @@ class MarantzAVR:
     async def mute_volume(self, mute: bool) -> None:
         await self._send_command("MU", _on_off_from_bool(mute))
         await self._wait_for_response("MU")
+
+    async def set_volume_level(self, level: int) -> None:
+        await self._send_command(f"MV{level:02}")
+        await self._wait_for_response("MV")
+
+    async def volume_level_up(self) -> None:
+        await self._send_command("MVUP")
+        await self._wait_for_response("MV")
+
+    async def volume_level_down(self) -> None:
+        await self._send_command("MVDOWN")
+        await self._wait_for_response("MV")
 
     async def select_source(self, source: InputSource) -> None:
         await self._send_command("SI", source.value)
@@ -178,3 +190,15 @@ class MarantzAVR:
         if value is not None:
             return enum_type(value)
         return None
+
+    def _get_volume_level(self, name: str) -> Optional[float]:
+        value = self._data[name]
+        if value is None:
+            return None
+
+        # Volume levels are either 2 or 3 characters. The floating point is between 2 and 3.
+        value = value.strip()
+        level = float(value)
+        if len(value) == 3:
+            level /= 10.
+        return level

@@ -37,6 +37,15 @@ async def run(args):
     if args.select_sound_mode:
         await avr.select_sound_mode(SurroundMode[args.select_sound_mode])
 
+    if args.set_volume_level:
+        await avr.set_volume_level(args.set_volume_level)
+
+    if args.volume_level_up:
+        await avr.volume_level_up()
+
+    if args.volume_level_down:
+        await avr.volume_level_down()
+
 
 def main():
     """Console script for aio_marantz_avr."""
@@ -51,6 +60,10 @@ def main():
                         help="Select input source.")
     parser.add_argument("--select-sound-mode", choices=SurroundMode.__members__.keys(),
                         help="Select sound mode.")
+    parser.add_argument("--set-volume-level", type=int, help="Set the volume level.")
+    parser.add_argument("--volume-level-up", action="store_true", help="Turn the volume level up.")
+    parser.add_argument("--volume-level-down", action="store_true",
+                        help="Turn the volume level down.")
     args = parser.parse_args()
 
     asyncio.run(run(args))
