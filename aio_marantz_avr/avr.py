@@ -111,7 +111,7 @@ class MarantzAVR:
         await self._wait_for_response("PW")
 
     async def turn_off(self) -> None:
-        await self._send_command("PW", "OFF")
+        await self._send_command("PW", "STANDBY")
         await self._wait_for_response("PW")
 
     async def mute_volume(self, mute: bool) -> None:

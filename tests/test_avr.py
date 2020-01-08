@@ -101,16 +101,7 @@ async def test_turn_on(avr, test_shell):
 async def test_turn_off(avr, test_shell):
     await test_shell.run_and_respond(
         avr.turn_off(),
-        {"PWOFF\r": ["PWOFF\r"]}
-    )
-    assert avr.power == Power.Off
-
-
-@pytest.mark.asyncio
-async def test_turn_off_to_standby(avr, test_shell):
-    await test_shell.run_and_respond(
-        avr.turn_off(),
-        {"PWOFF\r": ["PWSTANDBY\r"]}
+        {"PWSTANDBY\r": ["PWSTANDBY\r"]}
     )
     assert avr.power == Power.Standby
 
