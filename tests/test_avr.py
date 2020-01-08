@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Tests for `aio_marantz_avr` package."""
+"""Tests for `avr` package."""
 
 import asyncio
 import pytest
@@ -8,7 +8,7 @@ import telnetlib3
 
 from typing import Awaitable, List, Mapping, Optional
 
-from aio_marantz_avr import aio_marantz_avr
+from aio_marantz_avr import connect, Power, InputSource, SurroundMode, MarantzAVR
 
 
 class TestShell:
@@ -60,14 +60,14 @@ async def test_server(test_shell, unused_tcp_port):
 
 @pytest.mark.asyncio
 async def test_connect(test_server, test_shell, unused_tcp_port):
-    avr = await aio_marantz_avr.connect("localhost", port=unused_tcp_port)
+    avr = await connect("localhost", port=unused_tcp_port)
     assert avr is not None
     assert test_shell.connected
 
 
 @pytest.fixture
 async def avr(test_server, unused_tcp_port):
-    return await aio_marantz_avr.connect("localhost", port=unused_tcp_port)
+    return await connect("localhost", port=unused_tcp_port)
 
 
 @pytest.mark.asyncio
@@ -94,7 +94,7 @@ async def test_turn_on(avr, test_shell):
         avr.turn_on(),
         {"PWON\r": ["PWON\r"]}
     )
-    assert avr.power == aio_marantz_avr.Power.On
+    assert avr.power == Power.On
 
 
 @pytest.mark.asyncio
@@ -103,7 +103,7 @@ async def test_turn_off(avr, test_shell):
         avr.turn_off(),
         {"PWOFF\r": ["PWOFF\r"]}
     )
-    assert avr.power == aio_marantz_avr.Power.Off
+    assert avr.power == Power.Off
 
 
 @pytest.mark.asyncio
@@ -112,25 +112,25 @@ async def test_turn_off_to_standby(avr, test_shell):
         avr.turn_off(),
         {"PWOFF\r": ["PWSTANDBY\r"]}
     )
-    assert avr.power == aio_marantz_avr.Power.Standby
+    assert avr.power == Power.Standby
 
 
 @pytest.mark.asyncio
 async def test_select_source(avr, test_shell):
     await test_shell.run_and_respond(
-        avr.select_source(aio_marantz_avr.InputSource.DVD),
+        avr.select_source(InputSource.DVD),
         {"SIDVD\r": ["SIDVD\r"]}
     )
-    assert avr.source == aio_marantz_avr.InputSource.DVD
+    assert avr.source == InputSource.DVD
 
 
 @pytest.mark.asyncio
 async def test_select_sound_mode(avr, test_shell):
     await test_shell.run_and_respond(
-        avr.select_sound_mode(aio_marantz_avr.SurroundMode.Movie),
+        avr.select_sound_mode(SurroundMode.Movie),
         {"MSMOVIE\r": ["MSMOVIE\r"]}
     )
-    assert avr.sound_mode == aio_marantz_avr.SurroundMode.Movie
+    assert avr.sound_mode == SurroundMode.Movie
 
 
 @pytest.mark.asyncio
@@ -140,12 +140,12 @@ async def test_refresh(avr, test_shell):
         {"MU?\r": ["MUOFF\r"], "PW?\r": ["PWON\r"], "MV?\r": ["MV400\r", "MVMAX980\r"],
          "SI?\r": ["SISAT/CBL\r"], "MS?\r": ["MSDOLBY DIGITAL\r"],}
     )
-    assert avr.power == aio_marantz_avr.Power.On
+    assert avr.power == Power.On
     assert avr.is_volume_muted is False
     assert avr.volume_level == 400
     assert avr.max_volume_level == 980
-    assert avr.source == aio_marantz_avr.InputSource.CblSat
-    assert avr.sound_mode == aio_marantz_avr.SurroundMode.DolbyDigital
+    assert avr.source == InputSource.CblSat
+    assert avr.sound_mode == SurroundMode.DolbyDigital
 
 
 def test_initial_state(avr):

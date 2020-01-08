@@ -1,0 +1,91 @@
+"""Enums used by the AVR."""
+
+from enum import Enum
+
+
+class Power(Enum):
+    Off = "OFF"
+    On = "ON"
+    Standby = "STANDBY"
+
+
+class InputSource(Enum):
+    Phono = "PHONO"
+    CD = "CD"
+    DVD = "DVD"
+    Bluray = "BD"
+    TV = "TV"
+    CblSat = "SAT/CBL"
+    MediaPlayer = "MPLAY"
+    Game = "GAME"
+    Tuner = "TUNER"
+    HDRadio = "HDRADIO"
+    SiriusXM = "SIRIUSXM"
+    Pandora = "PANDORA"
+    InternetRadio = "IRADIO"
+    Server = "SERVER"
+    Favorites = "FAVORITES"
+    Aux1 = "AUX1"
+    Aux2 = "AUX2"
+    Aux3 = "AUX3"
+    Aux4 = "AUX4"
+    Aux5 = "AUX5"
+    Aux6 = "AUX6"
+    Aux7 = "AUX7"
+    OnlineMusic = "NET"
+    Bluetooth = "BT"
+
+
+class SurroundMode(Enum):
+    # Settable values
+    Movie = "MOVIE"
+    Music = "MUSIC"
+    Game = "GAME"
+    Direct = "DIRECT"
+    PureDirect = "PURE DIRECT"
+    Stereo = "STEREO"
+    Auto = "AUTO"
+    DolbyDigital = "DOLBY DIGITAL"
+    DtsSurround = "DTS SURROUND"
+    Auro3D = "AURO3D"
+    Auro2DSurround = "AURO2DSURR"
+    MultiChannelStereo = "MCH STEREO"
+    Virtual = "VIRTUAL"
+
+    # Rotate between options
+    Left = "LEFT"
+    Right = "RIGHT"
+
+    # Return only
+    # TODO: Split combined modes
+    DolbySurround = "DOLBY SURROUND"
+    DolbyAtmos = "DOLBY ATMOS"
+    DolbyDigitalDS = "DOLBY D+DS"
+    DolbyDigitalNeuralX = "DOLBY D+NEURAL:X"
+    DolbyDigitalPlus = "DOLBY D+"
+    DolbyDigitalPlusDS = "DOLBY D+ +DS"
+    DolbyDigitalPlusNeuralX = "DOLBY D+ +NEURAL:X"
+    DolbyHD = "DOLBY HD"
+    DolbyHDDS = "DOLBY HD+DS"
+    DolbyHDNeuralX = "DOLBY HD+NEURAL:X"
+    NeuralX = "NEURAL:X"
+    DtsEsDscrt6_1 = "DTS ES DSCRT6.1"
+    DtsEsMtrx6_1 = "DTS ES MTRX6.1"
+    DtsDS = "DTS+DS"
+    DtsNeuralX = "DTS+NEURAL:X"
+    DtsEsMtrxNeuralX = "DTS ES MTRX+NEURAL:X"
+    DtsEsDscrtNeuralX = "DTS ES DSCRT+NEURAL:X"
+    Dts96_24 = "DTS96/24"
+    Dts96EsMtrx = "DTS96 ES MTRX"
+    DtsHD = "DTS HD"
+    DtsHDMstr = "DTS HD MSTR"
+    DtsHDDS = "MSDTS HD+DS"
+    DtsHDNeuralX = "DTS HD+NEURAL:X"
+    DtsX = "DTS:X"
+    DtsXMstr = "DTS:X MSTR"
+    DtsExpress = "DTS EXPRESS"
+    DtsES8ChDscrt = "DTS ES 8CH DSCRT"
+    MultiChIn = "MULTI CH IN"
+    MultiChInDS = "M CH IN+DS"
+    MultiChInNeuralX = "M CH IN+NEURAL:X"
+    MultiChIn7_1 = "MULTI CH IN 7.1"
