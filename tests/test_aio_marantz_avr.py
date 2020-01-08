@@ -156,3 +156,30 @@ def test_initial_state(avr):
     assert avr.max_volume_level is None
     assert avr.source is None
     assert avr.sound_mode is None
+
+
+@pytest.mark.asyncio
+async def test_refresh_while_running_command(avr, test_shell):
+    turn_on_task = asyncio.create_task(avr.turn_on())
+    command = await test_shell.reader.readline()
+    assert command == "PWON\r"
+
+    await avr.refresh()
+
+    test_shell.writer.write("PWON\r")
+    await test_shell.writer.drain()
+    await turn_on_task
+
+
+@pytest.mark.asyncio
+async def test_run_command_while_refreshing(avr, test_shell):
+    refresh_task = asyncio.create_task(avr.refresh())
+    command = await test_shell.reader.readline()
+    assert command
+
+    await avr.turn_on()
+    command2 = await test_shell.reader.readline()
+    assert command2 == "PWON\r"
+
+    refresh_task.cancel()
+

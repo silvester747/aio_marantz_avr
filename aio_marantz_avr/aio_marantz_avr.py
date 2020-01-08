@@ -131,11 +131,13 @@ class MarantzAVR:
     _writer: telnetlib3.TelnetWriter
 
     _data: Mapping[str, Optional[str]]
+    _reading: bool
 
     def __init__(self, reader: telnetlib3.TelnetReader, writer: telnetlib3.TelnetWriter):
         self._reader = reader
         self._writer = writer
         self._prepare_data()
+        self._reading = False
 
     def _prepare_data(self):
         self._data = {}
@@ -184,6 +186,9 @@ class MarantzAVR:
         return list(SurroundMode)
 
     async def refresh(self) -> None:
+        if self._reading:
+            return
+
         for data_def in self.DATA_DEFS:
             await self._send_command(data_def.query)
             await self._wait_for_response(*data_def.data_names)
@@ -214,14 +219,21 @@ class MarantzAVR:
         await self._writer.drain()
 
     async def _wait_for_response(self, *names: Tuple[str]) -> None:
-        names = list(names)
-        while True:
-            line = await self._reader.readline()
-            match = self._process_response(line)
-            if match in names:
-                names.remove(match)
-                if len(names) == 0:
-                    return
+        if self._reading:
+            return
+
+        self._reading = True
+        try:
+            names = list(names)
+            while True:
+                line = await self._reader.readline()
+                match = self._process_response(line)
+                if match in names:
+                    names.remove(match)
+                    if len(names) == 0:
+                        return
+        finally:
+            self._reading = False
 
     def _process_response(self, response: str) -> Optional[str]:
         matches = [name for name in self._data.keys() if response.startswith(name)]
