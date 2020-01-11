@@ -10,6 +10,9 @@ AsyncIO Marantz AVR
         :target: https://aio-marantz-avr.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
+.. image:: https://github.com/silvester747/aio_marantz_avr/workflows/Python%20package/badge.svg
+        :target: https://github.com/silvester747/aio_marantz_avr/actions
+        :alt: Build Status
 
 AsyncIO access to Marantz AVRs.
 
@@ -21,8 +24,7 @@ AsyncIO access to Marantz AVRs.
 Features
 --------
 
-* Basic control of the AVR.
-* Keeping the connection upen to receive puyshed updates.
+* Control and read status of a Marantz AVR over Telnet using python AsyncIO.
 * Command line tool.
 
 Credits
