@@ -8,7 +8,7 @@ import telnetlib3
 
 from typing import Awaitable, List, Mapping
 
-from aio_marantz_avr import connect, Power, InputSource, SurroundMode
+from aio_marantz_avr import connect, DisconnectedError, InputSource, Power, SurroundMode
 
 
 class TestShell:
@@ -223,3 +223,21 @@ async def test_run_command_while_refreshing(avr, test_shell):
     assert command2 == "PWON\r"
 
     refresh_task.cancel()
+
+
+@pytest.mark.asyncio
+async def test_refresh_after_disconnect(avr, test_shell, test_server):
+    test_shell.writer.close()
+    test_server.close()
+
+    with pytest.raises(DisconnectedError):
+        await avr.refresh()
+
+
+@pytest.mark.asyncio
+async def test_send_command_after_disconnect(avr, test_shell, test_server):
+    test_shell.writer.close()
+    test_server.close()
+
+    with pytest.raises(DisconnectedError):
+        await avr.turn_on()

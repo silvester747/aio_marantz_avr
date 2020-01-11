@@ -7,6 +7,14 @@ from typing import Any, List, Mapping, Optional, Tuple, Type
 from .enums import InputSource, Power, SurroundMode
 
 
+class AvrError(Exception):
+    pass
+
+
+class DisconnectedError(AvrError):
+    pass
+
+
 async def connect(host: str, port: int = 23):
     reader, writer = await telnetlib3.open_connection(host, port=port, encoding="ascii")
     return MarantzAVR(reader, writer)
@@ -140,6 +148,9 @@ class MarantzAVR:
         await self._wait_for_response("MS")
 
     async def _send_command(self, *parts: Tuple[str]) -> None:
+        if self._reader.at_eof():
+            raise DisconnectedError()
+
         self._writer.write("".join(parts))
         self._writer.write("\r")
         await self._writer.drain()
@@ -153,11 +164,16 @@ class MarantzAVR:
             names = list(names)
             while True:
                 line = await self._reader.readline()
+                if not line and self._reader.at_eof():
+                    raise DisconnectedError
+
                 match = self._process_response(line)
                 if match in names:
                     names.remove(match)
                     if len(names) == 0:
                         return
+        except ConnectionError:
+            raise DisconnectedError
         finally:
             self._reading = False
 

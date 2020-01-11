@@ -3,7 +3,7 @@ import argparse
 import asyncio
 import sys
 
-from .avr import connect
+from .avr import connect, DisconnectedError
 from .enums import InputSource, SurroundMode
 
 
@@ -66,7 +66,11 @@ def main():
                         help="Turn the volume level down.")
     args = parser.parse_args()
 
-    asyncio.run(run(args))
+    try:
+        asyncio.run(run(args))
+    except DisconnectedError:
+        print("Connection lost.", file=sys.stderr)
+        return 1
 
     return 0
 
