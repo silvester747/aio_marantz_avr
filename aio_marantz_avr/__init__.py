@@ -6,3 +6,5 @@ __version__ = '0.1.0'
 
 from .avr import connect, MarantzAVR
 from .enums import Power, InputSource, SurroundMode
+
+__all__ = ["connect", "MarantzAVR", "Power", "InputSource", "SurroundMode"]

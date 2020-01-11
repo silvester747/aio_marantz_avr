@@ -6,9 +6,9 @@ import asyncio
 import pytest
 import telnetlib3
 
-from typing import Awaitable, List, Mapping, Optional
+from typing import Awaitable, List, Mapping
 
-from aio_marantz_avr import connect, Power, InputSource, SurroundMode, MarantzAVR
+from aio_marantz_avr import connect, Power, InputSource, SurroundMode
 
 
 class TestShell:
@@ -174,7 +174,7 @@ async def test_refresh(avr, test_shell):
     await test_shell.run_and_respond(
         avr.refresh(),
         {"MU?\r": ["MUOFF\r"], "PW?\r": ["PWON\r"], "MV?\r": ["MV400\r", "MVMAX980\r"],
-         "SI?\r": ["SISAT/CBL\r"], "MS?\r": ["MSDOLBY DIGITAL\r"],}
+         "SI?\r": ["SISAT/CBL\r"], "MS?\r": ["MSDOLBY DIGITAL\r"], }
     )
     assert avr.power == Power.On
     assert avr.is_volume_muted is False
@@ -218,4 +218,3 @@ async def test_run_command_while_refreshing(avr, test_shell):
     assert command2 == "PWON\r"
 
     refresh_task.cancel()
-

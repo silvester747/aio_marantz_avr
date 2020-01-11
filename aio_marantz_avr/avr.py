@@ -31,6 +31,7 @@ class DataDefinition:
         self.query = query
         self.data_names = data_names
 
+
 class MarantzAVR:
     DATA_DEFS: List[DataDefinition] = [
         DataDefinition("PW?", ["PW"]),
