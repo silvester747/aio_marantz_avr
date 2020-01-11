@@ -47,11 +47,16 @@ def test_shell():
     return TestShell()
 
 
+def create_task(coro):
+    # asyncio.create_task does not exist yet in python 3.6, but ensure_future does the same
+    return asyncio.ensure_future(coro)
+
+
 @pytest.fixture
 async def test_server(test_shell, unused_tcp_port):
     server = await telnetlib3.create_server(shell=test_shell.shell, port=unused_tcp_port,
                                             encoding="ascii")
-    server_task = asyncio.create_task(server.wait_closed())
+    server_task = create_task(server.wait_closed())
     yield server
     test_shell.writer.close()
     server.close()
@@ -196,7 +201,7 @@ def test_initial_state(avr):
 
 @pytest.mark.asyncio
 async def test_refresh_while_running_command(avr, test_shell):
-    turn_on_task = asyncio.create_task(avr.turn_on())
+    turn_on_task = create_task(avr.turn_on())
     command = await test_shell.reader.readline()
     assert command == "PWON\r"
 
@@ -209,7 +214,7 @@ async def test_refresh_while_running_command(avr, test_shell):
 
 @pytest.mark.asyncio
 async def test_run_command_while_refreshing(avr, test_shell):
-    refresh_task = asyncio.create_task(avr.refresh())
+    refresh_task = create_task(avr.refresh())
     command = await test_shell.reader.readline()
     assert command
 
