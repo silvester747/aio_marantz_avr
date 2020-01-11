@@ -1,4 +1,4 @@
-"""Main module."""
+"""Control of an AVR over Telnet."""
 
 import asyncio
 import telnetlib3
@@ -9,18 +9,22 @@ from .enums import InputSource, Power, SurroundMode
 
 
 class AvrError(Exception):
+    """Base class for all errors returned from an AVR."""
     pass
 
 
 class DisconnectedError(AvrError):
+    """The connection to the AVR has been lost, or has never been established."""
     pass
 
 
 class AvrTimeoutError(AvrError):
+    """A request to the AVR has timed out."""
     pass
 
 
 async def connect(host: str, port: int = 23, timeout: float = 1.):
+    """Connect to an AVR."""
     reader, writer = await telnetlib3.open_connection(host, port=port, encoding="ascii")
     return MarantzAVR(reader, writer, timeout)
 
@@ -36,7 +40,7 @@ def _on_off_to_bool(value: str) -> bool:
     return value == "ON"
 
 
-class DataDefinition:
+class _DataDefinition:
     query: str
     data_names: List[str]
 
@@ -46,12 +50,16 @@ class DataDefinition:
 
 
 class MarantzAVR:
-    DATA_DEFS: List[DataDefinition] = [
-        DataDefinition("PW?", ["PW"]),
-        DataDefinition("MU?", ["MU"]),
-        DataDefinition("MV?", ["MV", "MVMAX"]),
-        DataDefinition("SI?", ["SI"]),
-        DataDefinition("MS?", ["MS"]),
+    """Connection to a Marantz AVR over Telnet.
+
+    Uses `connect` to create a connection to the AVR.
+    """
+    DATA_DEFS: List[_DataDefinition] = [
+        _DataDefinition("PW?", ["PW"]),
+        _DataDefinition("MU?", ["MU"]),
+        _DataDefinition("MV?", ["MV", "MVMAX"]),
+        _DataDefinition("SI?", ["SI"]),
+        _DataDefinition("MS?", ["MS"]),
     ]
 
     _reader: telnetlib3.TelnetReader
@@ -116,6 +124,7 @@ class MarantzAVR:
         return list(SurroundMode)
 
     async def refresh(self) -> None:
+        """Refresh all properties from the AVR."""
         if self._reading:
             return
 
@@ -124,34 +133,50 @@ class MarantzAVR:
             await self._wait_for_response_with_timeout(*data_def.data_names)
 
     async def turn_on(self) -> None:
+        """Turn the AVR on."""
         await self._send_command("PW", "ON")
         await self._wait_for_response_with_timeout("PW")
 
     async def turn_off(self) -> None:
+        """Turn the AVR off."""
         await self._send_command("PW", "STANDBY")
         await self._wait_for_response_with_timeout("PW")
 
     async def mute_volume(self, mute: bool) -> None:
+        """Mute or unmute the volume.
+
+        Arguments:
+        mute -- True to mute, False to unmute.
+        """
         await self._send_command("MU", _on_off_from_bool(mute))
         await self._wait_for_response_with_timeout("MU")
 
     async def set_volume_level(self, level: int) -> None:
+        """Set the volume level.
+
+        Arguments:
+        level -- An integer value between 0 and `max_volume_level`.
+        """
         await self._send_command(f"MV{level:02}")
         await self._wait_for_response_with_timeout("MV")
 
     async def volume_level_up(self) -> None:
+        """Turn the volume level up one notch."""
         await self._send_command("MVUP")
         await self._wait_for_response_with_timeout("MV")
 
     async def volume_level_down(self) -> None:
+        """Turn the volume level down one notch."""
         await self._send_command("MVDOWN")
         await self._wait_for_response_with_timeout("MV")
 
     async def select_source(self, source: InputSource) -> None:
+        """Select the input source."""
         await self._send_command("SI", source.value)
         await self._wait_for_response_with_timeout("SI")
 
     async def select_sound_mode(self, mode: SurroundMode) -> None:
+        """Select the sound mode."""
         await self._send_command("MS", mode.value)
         await self._wait_for_response_with_timeout("MS")
 
