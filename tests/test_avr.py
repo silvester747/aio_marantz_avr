@@ -8,7 +8,8 @@ import telnetlib3
 
 from typing import Awaitable, List, Mapping
 
-from aio_marantz_avr import connect, DisconnectedError, InputSource, Power, SurroundMode
+from aio_marantz_avr import (connect, DisconnectedError, InputSource, Power, SurroundMode,
+                             AvrTimeoutError)
 
 
 class TestShell:
@@ -189,6 +190,16 @@ async def test_refresh(avr, test_shell):
     assert avr.sound_mode == SurroundMode.DolbyDigital
 
 
+@pytest.mark.asyncio
+async def test_timeout_during_refresh(avr, test_shell):
+    task = create_task(test_shell.expect_and_respond({"MU?\r": ["MUOFF\r"], }))
+
+    with pytest.raises(AvrTimeoutError):
+        await avr.refresh()
+
+    task.cancel()
+
+
 def test_initial_state(avr):
     """Initial states are unknown, so None"""
     assert avr.power is None
@@ -240,4 +251,10 @@ async def test_send_command_after_disconnect(avr, test_shell, test_server):
     test_server.close()
 
     with pytest.raises(DisconnectedError):
+        await avr.turn_on()
+
+
+@pytest.mark.asyncio
+async def test_timeout_in_command(avr):
+    with pytest.raises(AvrTimeoutError):
         await avr.turn_on()

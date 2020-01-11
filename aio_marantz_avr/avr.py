@@ -1,5 +1,6 @@
 """Main module."""
 
+import asyncio
 import telnetlib3
 
 from typing import Any, List, Mapping, Optional, Tuple, Type
@@ -15,9 +16,13 @@ class DisconnectedError(AvrError):
     pass
 
 
-async def connect(host: str, port: int = 23):
+class AvrTimeoutError(AvrError):
+    pass
+
+
+async def connect(host: str, port: int = 23, timeout: float = 1.):
     reader, writer = await telnetlib3.open_connection(host, port=port, encoding="ascii")
-    return MarantzAVR(reader, writer)
+    return MarantzAVR(reader, writer, timeout)
 
 
 def _on_off_from_bool(value: bool) -> str:
@@ -51,13 +56,16 @@ class MarantzAVR:
 
     _reader: telnetlib3.TelnetReader
     _writer: telnetlib3.TelnetWriter
+    _timeout: float
 
     _data: Mapping[str, Optional[str]]
     _reading: bool
 
-    def __init__(self, reader: telnetlib3.TelnetReader, writer: telnetlib3.TelnetWriter):
+    def __init__(self, reader: telnetlib3.TelnetReader, writer: telnetlib3.TelnetWriter,
+                 timeout: float):
         self._reader = reader
         self._writer = writer
+        self._timeout = timeout
         self._prepare_data()
         self._reading = False
 
@@ -113,39 +121,39 @@ class MarantzAVR:
 
         for data_def in self.DATA_DEFS:
             await self._send_command(data_def.query)
-            await self._wait_for_response(*data_def.data_names)
+            await self._wait_for_response_with_timeout(*data_def.data_names)
 
     async def turn_on(self) -> None:
         await self._send_command("PW", "ON")
-        await self._wait_for_response("PW")
+        await self._wait_for_response_with_timeout("PW")
 
     async def turn_off(self) -> None:
         await self._send_command("PW", "STANDBY")
-        await self._wait_for_response("PW")
+        await self._wait_for_response_with_timeout("PW")
 
     async def mute_volume(self, mute: bool) -> None:
         await self._send_command("MU", _on_off_from_bool(mute))
-        await self._wait_for_response("MU")
+        await self._wait_for_response_with_timeout("MU")
 
     async def set_volume_level(self, level: int) -> None:
         await self._send_command(f"MV{level:02}")
-        await self._wait_for_response("MV")
+        await self._wait_for_response_with_timeout("MV")
 
     async def volume_level_up(self) -> None:
         await self._send_command("MVUP")
-        await self._wait_for_response("MV")
+        await self._wait_for_response_with_timeout("MV")
 
     async def volume_level_down(self) -> None:
         await self._send_command("MVDOWN")
-        await self._wait_for_response("MV")
+        await self._wait_for_response_with_timeout("MV")
 
     async def select_source(self, source: InputSource) -> None:
         await self._send_command("SI", source.value)
-        await self._wait_for_response("SI")
+        await self._wait_for_response_with_timeout("SI")
 
     async def select_sound_mode(self, mode: SurroundMode) -> None:
         await self._send_command("MS", mode.value)
-        await self._wait_for_response("MS")
+        await self._wait_for_response_with_timeout("MS")
 
     async def _send_command(self, *parts: Tuple[str]) -> None:
         if self._reader.at_eof():
@@ -154,6 +162,15 @@ class MarantzAVR:
         self._writer.write("".join(parts))
         self._writer.write("\r")
         await self._writer.drain()
+
+    async def _with_timeout(self, coro) -> Optional[Any]:
+        try:
+            return await asyncio.wait_for(coro, self._timeout)
+        except asyncio.TimeoutError:
+            raise AvrTimeoutError
+
+    async def _wait_for_response_with_timeout(self, *names: Tuple[str]) -> None:
+        await self._with_timeout(self._wait_for_response(*names))
 
     async def _wait_for_response(self, *names: Tuple[str]) -> None:
         if self._reading:
