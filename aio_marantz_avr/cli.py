@@ -21,30 +21,39 @@ async def run(args):
 
     if args.turn_on:
         await avr.turn_on()
+        print(f"NEW Power: {avr.power}")
 
     if args.turn_off:
         await avr.turn_off()
+        print(f"NEW Power: {avr.power}")
 
     if args.mute_volume_on:
         await avr.mute_volume(True)
+        print(f"NEW Is volume muted: {avr.is_volume_muted}")
 
     if args.mute_volume_off:
         await avr.mute_volume(False)
+        print(f"NEW Is volume muted: {avr.is_volume_muted}")
 
     if args.select_source:
         await avr.select_source(InputSource[args.select_source])
+        print(f"NEW Source: {avr.source}")
 
     if args.select_sound_mode:
         await avr.select_sound_mode(SurroundMode[args.select_sound_mode])
+        print(f"NEW Sound mode: {avr.sound_mode}")
 
     if args.set_volume_level:
         await avr.set_volume_level(args.set_volume_level)
+        print(f"NEW Volume level: {avr.volume_level}")
 
     if args.volume_level_up:
         await avr.volume_level_up()
+        print(f"NEW Volume level: {avr.volume_level}")
 
     if args.volume_level_down:
         await avr.volume_level_down()
+        print(f"NEW Volume level: {avr.volume_level}")
 
 
 def main():
