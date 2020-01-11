@@ -65,14 +65,17 @@ def main():
     parser.add_argument("--turn-off", action="store_true", help="Turn the AVR off.")
     parser.add_argument("--mute-volume-on", action="store_true", help="Turn volume mute on.")
     parser.add_argument("--mute-volume-off", action="store_true", help="Turn volume mute off.")
-    parser.add_argument("--select-source", choices=InputSource.__members__.keys(),
-                        help="Select input source.")
-    parser.add_argument("--select-sound-mode", choices=SurroundMode.__members__.keys(),
-                        help="Select sound mode.")
+    parser.add_argument(
+        "--select-source", choices=InputSource.__members__.keys(), help="Select input source.",
+    )
+    parser.add_argument(
+        "--select-sound-mode", choices=SurroundMode.__members__.keys(), help="Select sound mode.",
+    )
     parser.add_argument("--set-volume-level", type=int, help="Set the volume level.")
     parser.add_argument("--volume-level-up", action="store_true", help="Turn the volume level up.")
-    parser.add_argument("--volume-level-down", action="store_true",
-                        help="Turn the volume level down.")
+    parser.add_argument(
+        "--volume-level-down", action="store_true", help="Turn the volume level down."
+    )
     args = parser.parse_args()
 
     try:

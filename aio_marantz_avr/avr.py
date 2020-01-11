@@ -10,20 +10,23 @@ from .enums import InputSource, Power, SurroundMode
 
 class AvrError(Exception):
     """Base class for all errors returned from an AVR."""
+
     pass
 
 
 class DisconnectedError(AvrError):
     """The connection to the AVR has been lost, or has never been established."""
+
     pass
 
 
 class AvrTimeoutError(AvrError):
     """A request to the AVR has timed out."""
+
     pass
 
 
-async def connect(host: str, port: int = 23, timeout: float = 1.) -> "MarantzAVR":
+async def connect(host: str, port: int = 23, timeout: float = 1.0) -> "MarantzAVR":
     """Connect to an AVR."""
     reader, writer = await telnetlib3.open_connection(host, port=port, encoding="ascii")
     return MarantzAVR(reader, writer, timeout)
@@ -54,6 +57,7 @@ class MarantzAVR:
 
     Uses `connect` to create a connection to the AVR.
     """
+
     DATA_DEFS: List[_DataDefinition] = [
         _DataDefinition("PW?", ["PW"]),
         _DataDefinition("MU?", ["MU"]),
@@ -69,8 +73,9 @@ class MarantzAVR:
     _data: MutableMapping[str, Optional[str]]
     _reading: bool
 
-    def __init__(self, reader: telnetlib3.TelnetReader, writer: telnetlib3.TelnetWriter,
-                 timeout: float):
+    def __init__(
+        self, reader: telnetlib3.TelnetReader, writer: telnetlib3.TelnetWriter, timeout: float,
+    ):
         self._reader = reader
         self._writer = writer
         self._timeout = timeout
@@ -79,7 +84,7 @@ class MarantzAVR:
 
     def _prepare_data(self) -> None:
         self._data = {}
-        for data_def in self. DATA_DEFS:
+        for data_def in self.DATA_DEFS:
             for name in data_def.data_names:
                 self._data[name] = None
 
@@ -229,7 +234,7 @@ class MarantzAVR:
             matches.sort(key=len, reverse=True)
         match = matches[0]
 
-        self._data[match] = response.strip()[len(match):]
+        self._data[match] = response.strip()[len(match) :]
         return match
 
     def _get_boolean_data(self, name: str) -> Optional[bool]:
@@ -259,5 +264,5 @@ class MarantzAVR:
         value = value.strip()
         level = float(value)
         if len(value) == 3:
-            level /= 10.
+            level /= 10.0
         return level
