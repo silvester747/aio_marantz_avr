@@ -3,7 +3,7 @@
 import asyncio
 import telnetlib3
 
-from typing import Any, List, Mapping, Optional, Tuple, Type
+from typing import Any, List, MutableMapping, Optional, Type
 
 from .enums import InputSource, Power, SurroundMode
 
@@ -23,7 +23,7 @@ class AvrTimeoutError(AvrError):
     pass
 
 
-async def connect(host: str, port: int = 23, timeout: float = 1.):
+async def connect(host: str, port: int = 23, timeout: float = 1.) -> "MarantzAVR":
     """Connect to an AVR."""
     reader, writer = await telnetlib3.open_connection(host, port=port, encoding="ascii")
     return MarantzAVR(reader, writer, timeout)
@@ -66,7 +66,7 @@ class MarantzAVR:
     _writer: telnetlib3.TelnetWriter
     _timeout: float
 
-    _data: Mapping[str, Optional[str]]
+    _data: MutableMapping[str, Optional[str]]
     _reading: bool
 
     def __init__(self, reader: telnetlib3.TelnetReader, writer: telnetlib3.TelnetWriter,
@@ -77,7 +77,7 @@ class MarantzAVR:
         self._prepare_data()
         self._reading = False
 
-    def _prepare_data(self):
+    def _prepare_data(self) -> None:
         self._data = {}
         for data_def in self. DATA_DEFS:
             for name in data_def.data_names:
@@ -180,7 +180,7 @@ class MarantzAVR:
         await self._send_command("MS", mode.value)
         await self._wait_for_response_with_timeout("MS")
 
-    async def _send_command(self, *parts: Tuple[str]) -> None:
+    async def _send_command(self, *parts: str) -> None:
         if self._reader.at_eof():
             raise DisconnectedError()
 
@@ -194,25 +194,25 @@ class MarantzAVR:
         except asyncio.TimeoutError:
             raise AvrTimeoutError
 
-    async def _wait_for_response_with_timeout(self, *names: Tuple[str]) -> None:
+    async def _wait_for_response_with_timeout(self, *names: str) -> None:
         await self._with_timeout(self._wait_for_response(*names))
 
-    async def _wait_for_response(self, *names: Tuple[str]) -> None:
+    async def _wait_for_response(self, *names: str) -> None:
         if self._reading:
             return
 
         self._reading = True
         try:
-            names = list(names)
+            pending_names = list(names)
             while True:
                 line = await self._reader.readline()
                 if not line and self._reader.at_eof():
                     raise DisconnectedError
 
                 match = self._process_response(line)
-                if match in names:
-                    names.remove(match)
-                    if len(names) == 0:
+                if match in pending_names:
+                    pending_names.remove(match)
+                    if len(pending_names) == 0:
                         return
         except ConnectionError:
             raise DisconnectedError
@@ -235,7 +235,7 @@ class MarantzAVR:
     def _get_boolean_data(self, name: str) -> Optional[bool]:
         value = self._data[name]
         if value is not None:
-            return _on_off_to_bool(self._data[name])
+            return _on_off_to_bool(value)
         return None
 
     def _get_int_data(self, name: str) -> Optional[int]:
