@@ -86,3 +86,6 @@ install: clean ## install the package to the active Python's site-packages
 
 format: ## apply code formatting
 	black aio_marantz_avr
+
+mypy: ## check type hints with mypy
+	mypy aio_marantz_avr
