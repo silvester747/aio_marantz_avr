@@ -27,6 +27,14 @@ Features
 * Control and read status of a Marantz AVR over Telnet using python AsyncIO.
 * Command line tool.
 
+Supported models:
+
+* SR7011 (tested)
+* AV7703
+* SR6011
+* SR5011
+* NR1607
+
 Credits
 -------
 

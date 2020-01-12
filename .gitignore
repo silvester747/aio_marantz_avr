@@ -106,3 +106,7 @@ ENV/
 
 
 .venv
+
+# Generated documentation
+docs/aio_marantz_avr.rst
+docs/modules.rst
