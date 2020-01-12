@@ -3,8 +3,8 @@ AsyncIO Marantz AVR
 ===================
 
 
-.. image:: https://img.shields.io/pypi/v/aio_marantz_avr.svg
-        :target: https://pypi.python.org/pypi/aio_marantz_avr
+.. image:: https://img.shields.io/pypi/v/aio-marantz-avr.svg
+        :target: https://pypi.python.org/pypi/aio-marantz-avr
 
 .. image:: https://readthedocs.org/projects/aio-marantz-avr/badge/?version=latest
         :target: https://aio-marantz-avr.readthedocs.io/en/latest/?badge=latest
